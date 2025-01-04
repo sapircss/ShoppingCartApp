@@ -2,6 +2,7 @@ package com.example.shoppingcartapp.Fragments;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,8 +19,6 @@ import com.example.shoppingcartapp.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import java.util.Objects;
 
 public class Sign_Frag extends Fragment {
 
@@ -84,14 +83,12 @@ public class Sign_Frag extends Fragment {
     private void registerUser(String email, String password, String phone, View view) {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
-                    if (task.isSuccessful())
-                    {
-                        Toast.makeText(getActivity(), "Registration Successful!", Toast.LENGTH_SHORT).show();
+                    if (task.isSuccessful()) {
+                        Log.d("Sign_Frag", "User registration successful");
                         saveUserToDatabase(new User(email, password, phone), view);
-                        Navigation.findNavController(view).navigate(R.id.action_sign_Frag_to_login_Frag);
-                    }
-                    else {
-                        Toast.makeText(getActivity(), "Registration Failed ", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Log.e("Sign_Frag", "User registration failed", task.getException());
+                        Toast.makeText(getActivity(), "Registration Failed", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -101,10 +98,14 @@ public class Sign_Frag extends Fragment {
         usersRef.child(sanitizedEmail).setValue(user)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        Toast.makeText(getActivity(), "User saved to database successfully!", Toast.LENGTH_SHORT).show();
-                        Navigation.findNavController(view).navigate(R.id.action_sign_Frag_to_login_Frag);
+                        if (isAdded()) {
+                            Log.d("Sign_Frag", "User saved to database successfully");
+                            Toast.makeText(getActivity(), "User saved to database successfully!", Toast.LENGTH_SHORT).show();
+                            Navigation.findNavController(view).navigate(R.id.action_sign_Frag_to_login_Frag);
+                        }
                     } else {
-                        Toast.makeText(getActivity(), "Failed to save user to database: ", Toast.LENGTH_SHORT).show();
+                        Log.e("Sign_Frag", "Failed to save user to database", task.getException());
+                        Toast.makeText(getActivity(), "Failed to save user to database", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
